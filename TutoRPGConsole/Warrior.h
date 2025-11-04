@@ -1,6 +1,5 @@
-#ifndef WARRIOR_H
-#define WARRIOR_H
-
+#pragma once
+#include <iostream>
 #include "Character.h"
 
 class Warrior : public Character {
@@ -9,10 +8,7 @@ private:
 
 public:
     Warrior(const std::string& n, int hp, int atk, int arm);
-    ~Warrior();
 
-    void attack(Character* target) override;
-    void takeDamage(int damage) override;
+    void Attack(Character* target) override;
+    void TakeDamage(int damage) override;
 };
-
-#endif

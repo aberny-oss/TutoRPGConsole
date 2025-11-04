@@ -2,6 +2,8 @@
 
 int main() {
     Game game;
-    game.run();
+    game.Init();
+    game.Run();
+    game.Shutdown();
     return 0;
 }

@@ -1,135 +1,134 @@
 #include "Game.h"
-#include <iostream>
 
-Game::Game() : currentState(GameState::MENU), isRunning(true) {
-    characterManager = new CharacterManager();
-    inputManager = new InputManager();  // <-- AJOUT
-    std::cout << "=== JEU INITIALISE ===" << std::endl;
+Game::Game()
+    : currentState(GameState::MENU),
+    isRunning(false)
+{
+    // On NE créé PAS de manager ici,
+    // juste suffisant pour un objet valide.
 }
 
-Game::~Game() {
-    delete characterManager;
-    delete inputManager;  // <-- AJOUT
+void Game::Init() {
+    currentState = GameState::MENU;
+    isRunning = true;
+    characterManager = std::make_unique<CharacterManager>();
+    inputManager = std::make_unique<InputManager>();
+    std::cout << "\n=== Nouvelle partie initialisée ===" << std::endl;
 }
 
-void Game::run() {
+
+void Game::Run() {
+    Init(); // On démarre systématiquement par un Init
+
     while (isRunning) {
-        inputManager->update();  // <-- AJOUT : Capture des entrées
-        update();
-        display();
+        inputManager->Update();
+        Update();
+        Display();
     }
-    std::cout << "\n=== FIN DU JEU ===" << std::endl;
+    std::cout << "\n=== Fin du jeu ===" << std::endl;
 }
 
-void Game::update() {
+void Game::Shutdown() {
+    // Nettoyage si nécessaire
+    std::cout << "Nettoyage des ressources du jeu..." << std::endl;
+}
+
+void Game::Update() {
     switch (currentState) {
     case GameState::MENU:
-        handleMenu();
+        HandleMenu();
         break;
     case GameState::COMBAT:
-        handleCombat();
+        HandleCombat();
         break;
     case GameState::VICTOIRE:
-        handleVictoire();
+        HandleVictoire();
         break;
     case GameState::DEFAITE:
-        handleDefaite();
+        HandleDefaite();
         break;
     }
 }
 
-void Game::display() {
-    std::cout << "\n--- AFFICHAGE ---" << std::endl;
+void Game::Display() {
+    std::cout << "--- Affichage de l'état du jeu ---" << std::endl;
+    // Ici, on pourrait afficher les états, la vie, etc.
 }
 
-void Game::handleMenu() {
-    std::cout << "\n===== MENU PRINCIPAL =====" << std::endl;
-    std::cout << "Appuyez sur 's' pour commencer" << std::endl;
-    std::cout << "Appuyez sur 'q' pour quitter" << std::endl;
-
-    Action action = inputManager->getAction();  // <-- UTILISATION
+void Game::HandleMenu() {
+    std::cout << "[MENU] (s: start, q: quitter)" << std::endl;
+    Action action = inputManager->GetAction();
 
     if (action == Action::MENU_START) {
-        changeState(GameState::COMBAT);
+        ChangeState(GameState::COMBAT);
     }
     else if (action == Action::QUIT) {
         isRunning = false;
     }
 }
 
-void Game::handleCombat() {
-    std::cout << "\n===== COMBAT =====" << std::endl;
+void Game::HandleCombat() {
+    std::cout << "[COMBAT] (a: attaquer, d: défendre, q: quitter)" << std::endl;
 
-    Character* player = characterManager->getCharacter(0);
-    Character* enemy = characterManager->getCharacter(1);
+    // Affiche les PV de chaque combattant
+    std::cout << "Alliés :" << std::endl;
+    for (int i = 0; i < characterManager->GetAllyCount(); ++i) {
+        Character* ally = characterManager->GetAlly(i);
+        if (ally)
+            std::cout << "- " << ally->GetName() << " : " << ally->GetHealth() << " HP" << std::endl;
+    }
+    std::cout << "Ennemis :" << std::endl;
+    for (int j = 0; j < characterManager->GetEnemyCount(); ++j) {
+        Character* enemy = characterManager->GetEnemy(j);
+        if (enemy)
+            std::cout << "- " << enemy->GetName() << " : " << enemy->GetHealth() << " HP" << std::endl;
+    }
 
-    if (player && enemy) {
-        std::cout << "Joueur HP: " << player->getHealth() << " | ";
-        std::cout << "Ennemi HP: " << enemy->getHealth() << std::endl;
+    Action action = inputManager->GetAction();
 
-        Action action = inputManager->getAction();  // <-- UTILISATION
-
-        if (action == Action::ATTACK) {
-            player->attack(enemy);
-
-            // L'ennemi riposte si vivant
-            if (enemy->isAlive()) {
-                enemy->attack(player);
+    // Exemple : faire attaquer chaque allié le premier ennemi encore vivant
+    if (action == Action::ATTACK) {
+        for (int i = 0; i < characterManager->GetAllyCount(); ++i) {
+            Character* ally = characterManager->GetAlly(i);
+            // Trouve la première cible encore vivante
+            for (int j = 0; j < characterManager->GetEnemyCount(); ++j) {
+                Character* enemy = characterManager->GetEnemy(j);
+                if (ally && enemy && enemy->IsAlive()) {
+                    ally->Attack(enemy);
+                    break; // Chaque allié attaque un ennemi
+                }
             }
         }
-        else if (action == Action::DEFEND) {
-            std::cout << player->getName() << " se defend !" << std::endl;
-            // Logique de défense ici
-        }
-        else if (action == Action::QUIT) {
-            isRunning = false;
-            return;
-        }
-
-        // Vérification victoire/défaite
-        if (!enemy->isAlive()) {
-            changeState(GameState::VICTOIRE);
-        }
-        else if (!player->isAlive()) {
-            changeState(GameState::DEFAITE);
-        }
+        // Les ennemis peuvent riposter...
     }
 }
 
-void Game::handleVictoire() {
-    std::cout << "\n===== VICTOIRE =====" << std::endl;
-    std::cout << "Felicitations, vous avez gagne !" << std::endl;
-    std::cout << "Appuyez sur 'c' pour continuer ou 'q' pour quitter" << std::endl;
 
-    Action action = inputManager->getAction();  // <-- UTILISATION
+void Game::HandleVictoire() {
+    std::cout << "[VICTOIRE] (c: rejouer, q: quitter)" << std::endl;
+    Action action = inputManager->GetAction();
 
     if (action == Action::CONTINUE) {
-        changeState(GameState::MENU);
+        Init(); // Une nouvelle partie démarre
     }
     else if (action == Action::QUIT) {
         isRunning = false;
     }
 }
 
-void Game::handleDefaite() {
-    std::cout << "\n===== DEFAITE =====" << std::endl;
-    std::cout << "Vous avez perdu..." << std::endl;
-    std::cout << "Appuyez sur 'c' pour rejouer ou 'q' pour quitter" << std::endl;
-
-    Action action = inputManager->getAction();  // <-- UTILISATION
+void Game::HandleDefaite() {
+    std::cout << "[DEFAITE] (c: rejouer, q: quitter)" << std::endl;
+    Action action = inputManager->GetAction();
 
     if (action == Action::CONTINUE) {
-        // Réinitialiser le jeu
-        delete characterManager;
-        characterManager = new CharacterManager();
-        changeState(GameState::MENU);
+        Init();
     }
     else if (action == Action::QUIT) {
         isRunning = false;
     }
 }
 
-void Game::changeState(GameState newState) {
+void Game::ChangeState(GameState newState) {
     currentState = newState;
-    std::cout << "\n>>> Changement d'etat <<<" << std::endl;
+    std::cout << ">>> Changement d'état <<<" << std::endl;
 }

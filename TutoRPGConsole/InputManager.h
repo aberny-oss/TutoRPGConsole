@@ -1,9 +1,7 @@
-#ifndef INPUTMANAGER_H
-#define INPUTMANAGER_H
-
+#pragma once
+#include <iostream>
 #include <string>
 
-// Enum pour les actions possibles
 enum class Action {
     NONE,
     ATTACK,
@@ -20,12 +18,9 @@ private:
 
 public:
     InputManager();
-    ~InputManager();
 
-    void update();                    // Capture l'entrée clavier
-    Action getAction();               // Retourne l'action correspondante
-    char getLastKey() const;          // Retourne la dernière touche pressée
-    bool isKeyPressed(char key);      // Vérifie si une touche spécifique est pressée
+    void Update();               // Capture l'entrée clavier
+    Action GetAction();          // Retourne l'action correspondante
+    char GetLastKey() const;     // Retourne la dernière touche pressée
+    bool IsKeyPressed(char key); // Vérifie si une touche spécifique est pressée
 };
-
-#endif

@@ -1,21 +1,27 @@
-#ifndef CHARACTERMANAGER_H
-#define CHARACTERMANAGER_H
-
-#include "Character.h"
+#pragma once
+#include <iostream>
 #include <vector>
+#include <memory>
+#include "Character.h"
+#include "Warrior.h"
 
 class CharacterManager {
 private:
-    std::vector<Character*> characters;
+    std::vector<std::unique_ptr<Character>> allies;
+    std::vector<std::unique_ptr<Character>> enemies;
 
 public:
     CharacterManager();
-    ~CharacterManager();
 
-    void addCharacter(Character* character);
-    Character* getCharacter(int index);
-    void removeCharacter(int index);
-    int getCharacterCount() const;
+    void AddAlly(std::unique_ptr<Character> character);
+    void AddEnemy(std::unique_ptr<Character> character);
+
+    Character* GetAlly(int index);
+    Character* GetEnemy(int index);
+
+    void RemoveAlly(int index);
+    void RemoveEnemy(int index);
+
+    int GetAllyCount() const;
+    int GetEnemyCount() const;
 };
-
-#endif

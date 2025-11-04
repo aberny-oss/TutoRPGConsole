@@ -1,6 +1,6 @@
-#ifndef GAME_H
-#define GAME_H
-
+#pragma once
+#include <iostream>
+#include <memory>
 #include "CharacterManager.h"
 #include "InputManager.h"  // <-- AJOUT
 
@@ -14,23 +14,24 @@ enum class GameState {
 class Game {
 private:
     GameState currentState;
-    CharacterManager* characterManager;
-    InputManager* inputManager;  // <-- AJOUT
+    std::unique_ptr<CharacterManager> characterManager;
+    std::unique_ptr<InputManager> inputManager;
+
     bool isRunning;
 
-    void handleMenu();
-    void handleCombat();
-    void handleVictoire();
-    void handleDefaite();
+    void HandleMenu();
+    void HandleCombat();
+    void HandleVictoire();
+    void HandleDefaite();
 
 public:
     Game();
-    ~Game();
 
-    void run();
-    void update();
-    void display();
-    void changeState(GameState newState);
+    void Init();           // Initialise une nouvelle partie
+    void Run();            // Boucle principale
+    void Shutdown();       // Nettoyage
+
+    void Update();         // Mise à jour logique
+    void Display();        // Affichage
+    void ChangeState(GameState newState);
 };
-
-#endif

@@ -1,6 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H
-
+#pragma once
+#include <iostream>
 #include <string>
 
 class Character {
@@ -11,15 +10,12 @@ protected:
 
 public:
     Character(const std::string& n, int hp, int atk);
-    virtual ~Character();
 
     // Fonctions virtuelles pures (classe abstraite)
-    virtual void attack(Character* target) = 0;
-    virtual void takeDamage(int damage);
+    virtual void Attack(Character* target) = 0;
+    virtual void TakeDamage(int damage);
 
-    bool isAlive() const;
-    std::string getName() const;
-    int getHealth() const;
+    bool IsAlive() const;
+    std::string GetName() const;
+    int GetHealth() const;
 };
-
-#endif
